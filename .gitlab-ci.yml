@@ -1,13 +1,21 @@
+variables:
+  REGISTRY_NAME: docker.io
+  REGISTRY_USER: nicholasdille
+  
+.docker-login:
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - IMAGE_NAME=${REGISTRY_USER}/${CI_PROJECT_NAME/docker-}
+
 docker-build-master:
   image: docker:stable
   stage: build
   services:
     - docker:stable-dind
-  before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  extends: .docker-login
   script:
-    - docker build --pull -t "$CI_REGISTRY_IMAGE" .
-    - docker push "$CI_REGISTRY_IMAGE"
+    - docker build --pull --tag ${IMAGE_NAME} .
+    - docker push ${IMAGE_NAME}
   only:
     - master
 
@@ -16,10 +24,9 @@ docker-build:
   stage: build
   services:
     - docker:stable-dind
-  before_script:
-    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  extends: .docker-login
   script:
-    - docker build --pull -t "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME" .
-    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME"
+    - docker build --pull --build-arg PAPERMC_VERSION=${CI_COMMIT_REF_NAME} --tag ${IMAGE_NAME}:${CI_COMMIT_REF_NAME} .
+    - docker push ${IMAGE_NAME}:${CI_COMMIT_REF_NAME}
   except:
     - master
