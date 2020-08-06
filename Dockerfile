@@ -6,7 +6,7 @@ RUN apk add --update-cache --no-cache \
         curl \
         jq
 RUN if test "${PAPERMC_VERSION}" = "latest"; then \
-        PAPERMC_VERSION=$(curl --silent https://papermc.io/api/v1/paper/ | jq --raw-output '.versions[0]'); \
+        PAPERMC_VERSION=$(curl --silent --location https://papermc.io/api/v1/paper/ | jq --raw-output '.versions[0]'); \
     fi && \
     curl --silent --location --fail --output paper.jar https://papermc.io/api/v1/paper/${PAPERMC_VERSION}/latest/download
 
