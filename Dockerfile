@@ -16,7 +16,7 @@ RUN if test -z "${PAPERMC_VERSION}" || test "${PAPERMC_VERSION}" == "latest" || 
     fi && \
     echo "### Using version <${PAPERMC_VERSION}>" && \
     PAPERMC_VERSION_PATCH=$(\
-        curl --silent --location https://papermc.io/api/v1/paper/1.16.3/latest | \
+        curl --silent --location https://papermc.io/api/v1/paper/${PAPERMC_VERSION}/latest | \
         jq --raw-output '.build'\
     ) && \
     echo "### Using patch <${PAPERMC_VERSION_PATCH}>" && \
