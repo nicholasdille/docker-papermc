@@ -29,6 +29,9 @@ RUN curl --silent https://api.github.com/repos/itzg/mc-monitor/releases/latest |
         tar -xzC /usr/local/bin/ mc-monitor
 
 FROM openjdk:${JAVA_VERSION}-jre
+RUN apt-get update \
+ && apt-get -y install \
+        procps
 RUN useradd --create-home --shell /bin/bash minecraft \
  && mkdir -p /opt/papermc /var/opt/papermc \
  && chown -R minecraft /var/opt/papermc/
