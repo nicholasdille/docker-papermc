@@ -44,5 +44,5 @@ EXPOSE 25565
 ENV JAVA_MEM_START=256M \
     JAVA_MEM_MAX=768M
 CMD java -Xms${JAVA_MEM_START} -Xmx${JAVA_MEM_MAX} -jar /opt/papermc/paper.jar
-HEALTHCHECK --start-period=60s --interval=30s --timeout=10s --retries=3 \
-        CMD mc-monitor status
+#HEALTHCHECK --start-period=60s --interval=30s --timeout=10s --retries=3 \
+#        CMD mc-monitor status
