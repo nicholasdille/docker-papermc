@@ -42,6 +42,7 @@ EOF
 
 FROM eclipse-temurin:21-jre-jammy
 COPY --from=papermc /paper.jar /opt/papermc/
+COPY --chmod=0755 entrypoint.sh /
 RUN <<EOF
 useradd --create-home --shell /bin/bash minecraft
 mkdir -p \
@@ -55,4 +56,5 @@ VOLUME /var/opt/papermc
 EXPOSE 25565
 ENV JAVA_MEM_START=256M \
     JAVA_MEM_MAX=768M
-CMD [ "java", "-Xms${JAVA_MEM_START}", "-Xmx${JAVA_MEM_MAX}", "-jar", "/opt/papermc/paper.jar" ]
+ENTRYPOINT [ "/entrypoint.sh" ]
+CMD exec java -Xms${JAVA_MEM_START} -Xmx${JAVA_MEM_MAX} -jar /opt/papermc/paper.jar
