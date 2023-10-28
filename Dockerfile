@@ -1,9 +1,11 @@
 #syntax=docker/dockerfile:1.6
 
 FROM alpine AS papermc
-RUN apk add --update-cache --no-cache \
-        curl \
-        jq
+RUN <<EOF
+apk add --update-cache --no-cache \
+    curl \
+    jq
+EOF
 RUN <<EOF
 set -o errexit -o pipefail
 VERSION="$(
@@ -35,13 +37,18 @@ URL="https://papermc.io/api/v2/projects/paper/versions/${VERSION}/builds/${BUILD
 echo "### Using build <${BUILD}> with SHA256 <${SHA256}> from <${URL}>"
 
 curl -sSLf \
-    --output /paper.jar \
+    --output /papermc.jar \
     "${URL}"
-echo "${SHA256} /paper.jar" | sha256sum -c -
+echo "${SHA256} /papermc.jar" | sha256sum -c -
+
+echo "VERSION=${VERSION}" >>/papermc.env
+echo "BUILD=${BUILD}" >>/papermc.env
+echo "SHA256=${SHA256}" >>/papermc.env
 EOF
 
 FROM eclipse-temurin:21-jre-jammy
-COPY --from=papermc /paper.jar /opt/papermc/
+COPY --from=papermc /papermc.jar /opt/papermc/
+COPY --from=papermc /papermc.env /opt/papermc/
 COPY --chmod=0755 entrypoint.sh /
 RUN <<EOF
 useradd --create-home --shell /bin/bash minecraft
