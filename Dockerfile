@@ -1,48 +1,58 @@
-ARG JAVA_VERSION=11
+#syntax=docker/dockerfile:1.6
 
-FROM alpine AS tools
+FROM alpine AS papermc
 RUN apk add --update-cache --no-cache \
         curl \
         jq
+RUN <<EOF
+set -o errexit -o pipefail
+VERSION="$(
+    curl -sSLf \
+        https://api.papermc.io/v2/projects/paper \
+    | jq -r '.versions[]' \
+    | sort -V \
+    | tail -n 1
+)"
+echo "### Using version <${VERSION}>"
+BUILD_JSON="$(
+    curl -sSLf \
+        https://api.papermc.io/v2/projects/paper/versions/${VERSION}/builds \
+    | jq '.builds[-1]'
+)"
+BUILD="$(
+    echo "${BUILD_JSON}" \
+    | jq -r '.build'
+)"
+SHA256="$(
+    echo "${BUILD_JSON}" \
+    | jq -r '.downloads.application.sha256'
+)"
+FILE="$(
+    echo "${BUILD_JSON}" \
+    | jq -r '.downloads.application.name'
+)"
+URL="https://papermc.io/api/v2/projects/paper/versions/${VERSION}/builds/${BUILD}/downloads/${FILE}"
+echo "### Using build <${BUILD}> with SHA256 <${SHA256}> from <${URL}>"
 
-FROM tools AS papermc
-ARG PAPERMC_VERSION=latest
-RUN if test -z "${PAPERMC_VERSION}" || test "${PAPERMC_VERSION}" == "latest" || test "${PAPERMC_VERSION}" == "master"; then \
-        echo "### Fetching latest version"; \
-        PAPERMC_VERSION=$(\
-            curl --silent --location https://papermc.io/api/v1/paper/ | \
-            jq --raw-output '.versions[0]' \
-        ); \
-    fi && \
-    echo "### Using version <${PAPERMC_VERSION}>" && \
-    PAPERMC_VERSION_PATCH=$(\
-        curl --silent --location https://papermc.io/api/v1/paper/${PAPERMC_VERSION}/latest | \
-        jq --raw-output '.build'\
-    ) && \
-    echo "### Using patch <${PAPERMC_VERSION_PATCH}>" && \
-    curl --silent --location --fail --output /paper.jar https://papermc.io/api/v1/paper/${PAPERMC_VERSION}/${PAPERMC_VERSION_PATCH}/download
+curl -sSLf \
+    --output /paper.jar \
+    "${URL}"
+echo "${SHA256} /paper.jar" | sha256sum -c -
+EOF
 
-FROM tools AS mc-monitor
-RUN curl --silent https://api.github.com/repos/itzg/mc-monitor/releases/latest | \
-        jq --raw-output '.assets[] | select(.name | endswith("_linux_amd64.tar.gz")) | .browser_download_url' | \
-        xargs curl --location --fail | \
-        tar -xzC /usr/local/bin/ mc-monitor
-
-FROM openjdk:${JAVA_VERSION}-jre
-RUN apt-get update \
- && apt-get -y install \
-        procps
-RUN useradd --create-home --shell /bin/bash minecraft \
- && mkdir -p /opt/papermc /var/opt/papermc \
- && chown -R minecraft /var/opt/papermc/
+FROM eclipse-temurin:21-jre-jammy
 COPY --from=papermc /paper.jar /opt/papermc/
-COPY --from=mc-monitor /usr/local/bin/mc-monitor /usr/local/bin/mc-monitor
+RUN <<EOF
+useradd --create-home --shell /bin/bash minecraft
+mkdir -p \
+    /opt/papermc \
+    /var/opt/papermc
+chown -R minecraft /var/opt/papermc/
+EOF
 USER minecraft
 WORKDIR /var/opt/papermc
 VOLUME /var/opt/papermc
 EXPOSE 25565
 ENV JAVA_MEM_START=256M \
     JAVA_MEM_MAX=768M
-CMD java -Xms${JAVA_MEM_START} -Xmx${JAVA_MEM_MAX} -jar /opt/papermc/paper.jar
-#HEALTHCHECK --start-period=60s --interval=30s --timeout=10s --retries=3 \
-#        CMD mc-monitor status
+CMD [ "java", "-Xms${JAVA_MEM_START}", "-Xmx${JAVA_MEM_MAX}", "-jar", "/opt/papermc/paper.jar" ]
