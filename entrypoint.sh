@@ -1,8 +1,6 @@
 #!/bin/bash
 set -o errexit -o pipefail
 
-printenv
-
 echo "EULA=${EULA}."
 if ! test -f /var/opt/papermc/eula.txt && test "${EULA}" == "true"; then
     echo "Accepting EULA"
