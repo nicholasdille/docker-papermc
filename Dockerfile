@@ -54,9 +54,12 @@ RUN <<EOF
 useradd --create-home --shell /bin/bash minecraft
 mkdir -p \
     /opt/papermc \
+    /opt/minecraft-plugins \
+    /opt/minecraft-entrypoint.d \
     /var/opt/papermc
 chown -R minecraft /var/opt/papermc/
 EOF
+COPY --chmod=0755 entrypoint.d/* /opt/minecraft-entrypoint.d/
 USER minecraft
 WORKDIR /var/opt/papermc
 VOLUME /var/opt/papermc

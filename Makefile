@@ -1,2 +1,2 @@
 all:
-	@docker buildx build --tag nicholasdille/papermc:latest --load .
+	@docker buildx build --tag ghcr.io/nicholasdille/papermc:latest --load .
