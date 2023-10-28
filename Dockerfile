@@ -67,4 +67,3 @@ EXPOSE 25565
 ENV JAVA_MEM_START=256M \
     JAVA_MEM_MAX=768M
 ENTRYPOINT [ "/entrypoint.sh" ]
-CMD exec java -Xms${JAVA_MEM_START} -Xmx${JAVA_MEM_MAX} -jar /opt/papermc/papermc.jar

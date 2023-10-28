@@ -13,5 +13,9 @@ for file in ${ENTRPOINTS}; do
     fi
 done
 
+if test "$#" -eq 0; then
+    set -- java -Xms${JAVA_MEM_START} -Xmx${JAVA_MEM_MAX} -jar /opt/papermc/papermc.jar --universe worlds
+fi
+
 echo "Starting: $@"
 exec "$@"
