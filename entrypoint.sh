@@ -14,7 +14,7 @@ for file in ${ENTRPOINTS}; do
 done
 
 if test "$#" -eq 0; then
-    set -- java -Xms${JAVA_MEM_START} -Xmx${JAVA_MEM_MAX} -jar /opt/papermc/papermc.jar --plugins /opt/minecraft-plugins --universe worlds
+    set -- java -Xms${JAVA_MEM_START} -Xmx${JAVA_MEM_MAX} -jar /opt/papermc/papermc.jar --plugins /opt/minecraft-plugins --universe /opt/minecraft-worlds
 fi
 
 echo "Starting: $@"

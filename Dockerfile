@@ -55,9 +55,13 @@ useradd --create-home --shell /bin/bash minecraft
 mkdir -p \
     /opt/papermc \
     /opt/minecraft-plugins \
+    /opt/minecraft-worlds \
     /opt/minecraft-entrypoint.d \
     /var/opt/papermc
-chown -R minecraft /var/opt/papermc/ /opt/minecraft-plugins/
+chown -R minecraft:minecraft \
+    /var/opt/papermc/ \
+    /opt/minecraft-plugins/ \
+    /opt/minecraft-worlds/
 EOF
 COPY --chmod=0755 entrypoint.d/* /opt/minecraft-entrypoint.d/
 USER minecraft
