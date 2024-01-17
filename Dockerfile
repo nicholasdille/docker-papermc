@@ -57,7 +57,7 @@ mkdir -p \
     /opt/minecraft-plugins \
     /opt/minecraft-entrypoint.d \
     /var/opt/papermc
-chown -R minecraft /var/opt/papermc/
+chown -R minecraft /var/opt/papermc/ /opt/minecraft-plugins/
 EOF
 COPY --chmod=0755 entrypoint.d/* /opt/minecraft-entrypoint.d/
 USER minecraft
