@@ -70,4 +70,7 @@ VOLUME /var/opt/papermc
 EXPOSE 25565
 ENV JAVA_MEM_START=256M \
     JAVA_MEM_MAX=768M
+RUN <<EOF
+java -jar /opt/papermc/papermc.jar --plugins /opt/minecraft-plugins --universe /opt/minecraft-worlds --help
+EOF
 ENTRYPOINT [ "/entrypoint.sh" ]
